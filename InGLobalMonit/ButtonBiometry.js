@@ -46,10 +46,10 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   closeButton: {
-    position: "absolute", // <-- ВАЖНО!
+    position: "absolute", 
     left: 16,
     top: "50%",
-    transform: [{ translateY: -23 }], // 46 / 2 = 23 — центрируем по вертикали
+    transform: [{ translateY: -23 }], 
     width: 46,
     height: 46,
     borderRadius: 23,
