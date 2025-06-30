@@ -1,26 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // или другой икон-пакет, если не используешь Expo
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions} from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native'; // 👈 Добавить
+import { useNavigation } from '@react-navigation/native'; 
+import { useRoute, useFocusEffect } from '@react-navigation/native';
+import { useState, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const { height, width } = Dimensions.get('window');
 
 export default function Biometry() {
   const handleSend = () => {
-    console.log('Настройки');
+    navigation.navigate('ButtonBiometry'); 
   };
 
-  const kilo = 80
-
   const handleSendKilo = () => {
-    console.log(kilo+" КГ")
+    console.log(weight + " КГ")
   }
   
   const handleSendDieta = () => {
-    console.log("Худею")
+    console.log(goal)
   }
 
   const handleSendAktive = () => {
-    console.log("Активный")
+    console.log("Активность")
   }
 
   const navigation = useNavigation();
@@ -29,56 +31,104 @@ export default function Biometry() {
     navigation.navigate('ButtonBiometry'); 
   };
 
+  const [weight, setWeight] = useState(80); 
+  const [goal, setGoal] = useState("Худею");
+  const [activity, setActivity] = useState("low");
 
+  const route = useRoute();
 
+  const activityLevelLabels = {
+    low: "Не активный",
+    more: "Небольшая активность",
+    MoreThanMore: "Высокая активность",
+    TheMost: "Активный"
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadBiometrics = async () => {
+        try {
+          const jsonValue = await AsyncStorage.getItem('@biometrics');
+          if (jsonValue != null) {
+            const data = JSON.parse(jsonValue);
+            console.log('Загружено:', data);
+            if (data.weight) setWeight(data.weight);
+            if (data.goal) setGoal(data.goal);
+            if (data.activityLevel) setActivity(data.activityLevel);
+          }
+        } catch (e) {
+          console.log('Ошибка при загрузке', e);
+        }
+      };
+
+      loadBiometrics();
+    }, [])
+  );
 
   return (
-    <TouchableOpacity style = {styles.TouchableOpacity} onPress={handleBiomerty}>
-    <SafeAreaProvider>
+    <TouchableOpacity style={styles.TouchableOpacity} onPress={handleBiomerty}>
+      <SafeAreaProvider>
         <View style={styles.container}>
-        {/* Верхний блок: калории и кнопка */}
-        <View style={styles.header} >
+
+          {/* Верхний блок: заголовок и кнопка настроек */}
+          <View style={styles.header}>
             <View>
-            <Text style={styles.BiometryLabel}>Биометрия</Text>
+              <Text style={styles.BiometryLabel}>Биометрия</Text>
             </View>
 
             <TouchableOpacity 
-            style={styles.QuestionButton}
-            onPress={handleSend}>
-            <Ionicons 
-            name="settings-outline" 
-            size={27} 
-            color={"#C8D0DC"} 
-            />
+              style={styles.QuestionButton}
+              onPress={handleSend}>
+              <Ionicons 
+                name="settings-outline" 
+                size={27} 
+                color={"#C8D0DC"} 
+              />
             </TouchableOpacity>
-        </View>
-        <View style={styles.BottomButtons}>
-        <TouchableOpacity style={styles.kilo} onPress={handleSendKilo}>
-          <View style = {styles.FirstButtonText}>
-            <Text style={styles.textKilo}>{kilo}</Text>
-            <Text style={styles.KG}>КГ</Text>
           </View>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.kilo} onPress={handleSendDieta}>
-          <View style = {styles.FirstButtonText}>
-            <Text style={styles.textKilo}>Худею</Text>
+          {/* Кнопки */}
+          <View style={styles.BottomButtons}>
+            {/* Вес */}
+            <TouchableOpacity style={styles.kilo} onPress={handleSendKilo}>
+              <View style={styles.FirstButtonTextRow}>
+                <Text style={styles.textKilo}>{weight}</Text>
+                <Text style={styles.KG}>КГ</Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Цель */}
+            <TouchableOpacity style={styles.kilo} onPress={handleSendDieta}>
+              <View style={styles.FirstButtonText}>
+                <Text 
+                  style={styles.textKilo}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {goal}
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Активность */}
+            <TouchableOpacity style={styles.kilo} onPress={handleSendAktive}>
+              <View style={styles.FirstButtonText}>
+                <Text 
+                  style={styles.textKilo}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
+                  {activityLevelLabels[activity] || "Активность не выбрана"}
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.kilo} onPress={handleSendAktive}>
-          <View style = {styles.FirstButtonText}>
-            <Text style={styles.textKilo}>Активный</Text>
-          </View>
-        </TouchableOpacity>
         </View>
-        </View>
-
-    </SafeAreaProvider>
+      </SafeAreaProvider>
     </TouchableOpacity>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -98,6 +148,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+
   BiometryLabel: {
     marginTop: -15,
     fontWeight: "400",
@@ -123,8 +174,17 @@ const styles = StyleSheet.create({
   },
 
   FirstButtonText: {
+    justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 10,
+    flex: 1
+  },
+
+  FirstButtonTextRow: {
     flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
   },
 
   kilo: {
@@ -134,19 +194,20 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 4,
+    height: 46
   },
-
 
   textKilo: {
     color: 'white',
     fontSize: 18,
     fontWeight: '500',
-    marginRight: 6,
+    textAlign: "center"
   },
 
   KG: {
     color: 'white',
     fontSize: 18,
     fontWeight: '500',
+    marginLeft: 4,
   },
 });
