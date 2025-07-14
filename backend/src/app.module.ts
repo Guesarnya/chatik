@@ -8,14 +8,13 @@ import { ChatController } from './chat/chat.controller';
 // import { AuthModule } from './auth/auth.module';
 import { DishController } from './dish/dish.controller';
 import { DishService } from './dish/dish.service';
-import { PrismaModule } from 'prisma/prisma.module';
 import { HttpModule } from '@nestjs/axios'; 
 import { RedactDishController } from './redact-dish/redact-dish.controller';
 import { RedactDishService } from './redact-dish/redact.dish.service';
 
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, HttpModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), HttpModule],
   controllers: [MotivationController, GetRecipeController, ChatController, DishController, RedactDishController],
   providers: [OpenaiService, DishService, RedactDishService],
 })
