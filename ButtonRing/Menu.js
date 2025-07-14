@@ -1,15 +1,24 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Circle, Defs, LinearGradient, Stop, Mask, Pattern, Rect, Line, G, Path, ClipPath } from 'react-native-svg';
-import dishes from '../AllBackEnd/Dishes';
+import { SettingsModalContent } from "./SettingsModalContent"
+import { TrashModalContent } from "./TrashModalContent"
 
-export default function MenuItem({ name, kcal, protein, fat, carbs, image, onDelete }) {
-  const handleSettings = () => console.log("настройки");
-  const handleTrash = () => {
-  console.log("Delete")
-};
 
+export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, onDelete, onSettingsConfirm  }) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState(''); 
+
+  const onPressSettings = () => {
+    setModalType('settings');
+    setModalVisible(true);
+  };
+
+  const onPressTrash = () => {
+    setModalType('delete');
+    setModalVisible(true);
+  };
 
   const macroGrams = { protein: 100, fat: 100, carb: 100 };
 
@@ -17,6 +26,24 @@ export default function MenuItem({ name, kcal, protein, fat, carbs, image, onDel
   const imageSectionWidth = 92 + 14;
   const availableWidth = screenWidth - imageSectionWidth - 24;
   const barWidth = ((availableWidth - 2 * 12) / 3) - 8;
+
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleConfirmDelete = (cardId) => {
+    handleCloseModal();
+    onDelete && onDelete(cardId);
+  };
+
+
+  const handleSettingsAction = () => {
+    handleCloseModal();
+    if (onSettingsConfirm) {
+      onSettingsConfirm(); // ← вызываем коллбэк
+    }
+  };
 
   return (
     <View style={styles.dishes}>
@@ -27,10 +54,10 @@ export default function MenuItem({ name, kcal, protein, fat, carbs, image, onDel
         </View>
 
         <View style={styles.icons}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleSettings}>
+          <TouchableOpacity style={styles.iconButton} onPress={onPressSettings}>
             <Ionicons name="options-outline" size={24} color="#1D1D1D" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={handleTrash}>
+          <TouchableOpacity style={styles.iconButton} onPress={onPressTrash}>
             <Ionicons name="trash-outline" size={24} color="#1D1D1D" />
           </TouchableOpacity>
         </View>
@@ -58,6 +85,45 @@ export default function MenuItem({ name, kcal, protein, fat, carbs, image, onDel
           />
         </View>
       </View>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleCloseModal}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.4)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 20,
+        }}>
+          <View style={{
+            backgroundColor: 'white',
+            borderRadius: 20,
+            padding: 20,
+            width: '100%',
+            maxWidth: 320
+          }}>
+            {modalType === 'settings' && (
+              <SettingsModalContent
+                onClose={handleCloseModal}
+                onConfirm={handleSettingsAction}
+                cardId={id}
+                dishName={name}
+              />
+            )}
+            {modalType === 'delete' && (
+              <TrashModalContent 
+              onClose={handleCloseModal} 
+              onConfirm={handleConfirmDelete}
+              cardId={id}
+              dishName={name}
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -106,7 +172,21 @@ const MacroProgressBar = ({ label, value, max, type, width }) => {
 
         </Defs>
 
-        <Rect x="0" y="0" width={width} height="47" rx="15" fill="#F1F3F6" />
+        <Svg height="47" width={width}>
+        <Path
+          d={`
+            M0,15
+            A15,15 0 0 1 15,0
+            H${width - 15}
+            A15,15 0 0 1 ${width},15
+            V47
+            H0
+            Z
+          `}
+          fill="#F1F3F6"
+        />
+        </Svg>
+
       <G clipPath="url(#roundedTop)">
         <Rect
           x="0"

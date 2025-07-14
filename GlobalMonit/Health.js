@@ -1,24 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import Svg, {
-  Circle,
   Defs,
   LinearGradient,
   Stop,
-  Mask,
-  Pattern,
   Rect,
-  Line,
-  G,
-  Path
 } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons'; 
 import { useNavigation } from '@react-navigation/native'; 
 
+const { height: screenHeight } = Dimensions.get('window');
+
 export default function Health() {
   const navigation = useNavigation(); 
+
   const handleSearch = () => {
-    navigation.navigate('Chat'); 
+    console.log('Здоровье вопрос'); 
   };
 
   const handleHealthPress = () => {
@@ -27,16 +24,17 @@ export default function Health() {
 
   const getPatternFill = () => 'url(#grad)';
 
-  const totalHeight = 129;
+  // 👉 Динамическая высота:
+  const baseHeight = 129;
+  const totalHeight = screenHeight < 700 ? baseHeight * 0.7 : baseHeight; // например, 30% меньше на маленьких экранах
+
   const progress = 76;
   const filledHeight = (progress / 100) * totalHeight;
-
-
 
   return (
     <TouchableOpacity style={styles.button} onPress={handleHealthPress}>
       <View style={styles.container}>
-        {/* Заголовок и кнопка */}
+
         <View style={styles.topRow}>
           <Text style={styles.healthLabel}>Здоровье</Text>
           <TouchableOpacity style={styles.questionButton} onPress={handleSearch}>
@@ -44,16 +42,13 @@ export default function Health() {
           </TouchableOpacity>
         </View>
 
-
-        {/* Индикатор здоровья */}
         <View style={styles.progressRow}>
           <View style={styles.leftBottomText}>
             <Text style={styles.points}>76</Text>
             <Text style={styles.precents}>%</Text>
           </View>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar} />
-            <Svg height="129" width="26" >
+          <View style={[styles.progressContainer, { height: totalHeight }]}>
+            <Svg height={totalHeight} width="26">
               <Defs>
                 <LinearGradient id="grad" x1="0" y1="1" x2="0" y2="0">
                   <Stop offset="0" stopColor="#628EFF" />
@@ -61,19 +56,18 @@ export default function Health() {
                 </LinearGradient>
               </Defs>
 
+              {/* Серый фон */}
+              <Rect x="0" y="0" width="26" height={totalHeight} rx="10" fill="#F1F3F6" />
 
-            {/* Серый фон */} 
-            <Rect x="0" y="0" width="26" height="129" rx="10" fill="#F1F3F6" />
-
-            {/* Прогресс */}
-            <Rect
-              x="0"
-              y={129 - filledHeight}
-              width="26"
-              height={filledHeight}
-              rx="10"
-              fill={getPatternFill()}
-            />
+              {/* Прогресс */}
+              <Rect
+                x="0"
+                y={totalHeight - filledHeight}
+                width="26"
+                height={filledHeight}
+                rx="10"
+                fill={getPatternFill()}
+              />
             </Svg>
           </View>
         </View>
@@ -102,11 +96,10 @@ const styles = StyleSheet.create({
   },
   healthLabel: {
     fontSize: 16,
-    fontWeight: 400,
+    fontWeight: '400',
     color: '#8E98A6',
     marginTop: -14
   },
-
   questionButton: {
     width: 28,
     height: 28,
@@ -114,14 +107,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
-
   progressRow: {
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
     position: 'relative', 
   },
-
   leftBottomText: {
     position: 'absolute',
     bottom: 0,
@@ -129,32 +120,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
-
   points: {
     fontSize: 41,
-    fontWeight: 500,
+    fontWeight: '500',
     color: '#0046F8',
     marginRight: 3,
   },
-
   precents: {
     fontSize: 20,
     color: "#CFD6E0",
     marginBottom: 20
   },
-
   progressContainer: {
     width: 26,
-    height: 129,
     backgroundColor: '#F1F3F6',
     borderRadius: 10,
     justifyContent: 'flex-end',
     overflow: 'hidden',
-  },
-
-  progressBar: {
-    height: '76%', 
-    backgroundColor: '#0046F8',
-    borderRadius: 10,
   },
 });

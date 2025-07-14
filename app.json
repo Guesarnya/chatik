@@ -26,6 +26,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3ba37458-7bdf-4dd9-b67c-75fa879c2394"
+      }
+    },
+    "owner": "guesarnya"
   }
 }

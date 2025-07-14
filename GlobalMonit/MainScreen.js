@@ -16,10 +16,14 @@ import Motivation from './Motivation';
 import Recepies from './Recepies';
 import FirstRing from './FirstRing'; 
 import TestyAndHealthy from './TestyAndHealthy';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import BottomNavBar from '../Chat/BottomNavigation';
+
 
 export default function MainScreen() {
 
-
+  const navigation = useNavigation(); 
   const [activeTab, setActiveTab] = useState('map');
   const isCompactRing = useMemo(() => width < 360 || height < 640, []);
 
@@ -67,8 +71,11 @@ export default function MainScreen() {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.container}>
           {/* Верхний блок с кольцом */}
-          <View style={styles.topBlock}>
-            <FirstRing isSmall = {isCompactRing} />
+          <View style={[
+            styles.topBlock,
+            isCompactRing && styles.topBlockSmall // Добавляем доп. стиль если экран маленький
+          ]}>
+            <FirstRing isSmall={isCompactRing} />
           </View>
 
           {/* Две колонки */}
@@ -92,49 +99,9 @@ export default function MainScreen() {
             </View>
           </View>
         </View>
-        {/* Нижняя панель навигации */}
-      <View style={styles.bottomNavBar}>
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const IconComponent = tab.iconSet;
-
-          return (
-            <TouchableOpacity
-              key={tab.id}
-              style={styles.navButton}
-              onPress={() => setActiveTab(tab.id)}
-            >
-              <View
-                style={[
-                  tab.iconStyle.customStyle,
-                  isActive && {
-                    backgroundColor: '#0046F8',
-                    borderRadius: 20,
-                    width: 80,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  },
-                ]}
-              >
-                <IconComponent
-                  name={tab.icon}
-                  size={tab.iconStyle.size}
-                  color={
-                    isActive
-                      ? tab.iconStyle.activeColor
-                      : tab.iconStyle.inactiveColor
-                  }
-                />
-              </View>
-              <Text style={styles.navText}>{tab.label}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+        <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
       </SafeAreaView>
 
-    
     </>
   );
 }
@@ -144,6 +111,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F1F3F6',
   },
+
+  topBlockSmall: {
+    height: height * 0.48, // Например, 20% от экрана
+    aspectRatio: undefined, // Чтобы aspectRatio не перебивал твою высоту
+    width: "99%"
+  },
+
   container: {
     flex: 1,
     padding: width * 0.01,
@@ -154,6 +128,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 20,
     marginBottom: 4,
+    width: "99%"
   },
   columns: {
     flex: 1,

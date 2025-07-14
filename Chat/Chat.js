@@ -6,21 +6,33 @@ import React, { useEffect, useState, useRef } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import BottomNavBar from './BottomNavigation';
+import RenderHTML from 'react-native-render-html';
+import { useWindowDimensions } from 'react-native';
+
 
 
 export default function Chat() {
+
+  const { width } = useWindowDimensions();
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const flatListRef = useRef(null);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
 
 
   useEffect(() => {
-    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', (e) => {
       setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
     });
+
     const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
       setKeyboardVisible(false);
+      setKeyboardHeight(0);
     });
 
     return () => {
@@ -31,40 +43,89 @@ export default function Chat() {
 
 
 
-  const handleSend = () => {
-    if (message.trim()) {
-      const newMessage = {
-        id: Date.now().toString(),
-        text: message,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isMyMessage: true
+
+  const handleSend = async () => {
+    const trimmedMessage = message.trim();
+    if (!trimmedMessage || isLoading) return;
+
+    setIsLoading(true); // Блокируем повторный ввод
+    const time = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const userMessage = {
+      id: Date.now().toString(),
+      text: trimmedMessage,
+      isMyMessage: true,
+      time,
+    };
+
+    setMessages((prev) => [userMessage, ...prev]);
+    setMessage('');
+
+    try {
+      const response = await fetch('http://192.168.1.103:3000/chat/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: trimmedMessage }),
+      });
+
+      const data = await response.json();
+
+      const botText =
+        typeof data.message === 'string'
+          ? data.message
+          : typeof data.message?.text === 'string'
+            ? data.message.text
+            : 'Ошибка: неправильный формат ответа';
+
+      const replies = (data.followUps || []).slice(0, 2);
+
+      const botMessage = {
+        id: (Date.now() + 1).toString(),
+        text: botText,
+        isMyMessage: false,
+        time,
+        replies,
       };
 
-      setMessages(prev => [newMessage, ...prev]);
-      setMessage('');
+      const extraMessage = data.extra?.text
+        ? {
+            id: (Date.now() + 2).toString(),
+            text: data.extra.text,
+            isMyMessage: false,
+            time,
+          }
+        : null;
+
+      setMessages((prev) =>
+        extraMessage
+          ? [extraMessage, botMessage, ...prev]
+          : [botMessage, ...prev]
+      );
 
       setTimeout(() => {
         flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
       }, 100);
-
-      setTimeout(() => {
-        const botMessage = {
-          id: (Date.now() + 1).toString(),
-          text: "У меня было много ножей.",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isMyMessage: false,
-          replies: ["Абсолютно много?", "Советы по питанию?"]
-        };
-        setMessages(prev => [botMessage, ...prev]);
-      }, 3000);
+    } catch (error) {
+      console.error('Ошибка при отправке сообщения:', error);
+    } finally {
+      setIsLoading(false); // Разблокируем ввод
     }
   };
 
-  const handleReply = (replyText, botMessageId) => {
+
+
+
+  const handleReply = async (replyText, botMessageId) => {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const replyMessage = {
       id: Date.now().toString(),
       text: replyText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time,
       isMyMessage: true
     };
 
@@ -76,7 +137,60 @@ export default function Chat() {
         )
       ]
     );
+
+    try {
+      const response = await fetch('http://192.168.1.103:3000/chat/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: replyText }),
+      });
+
+      const data = await response.json();
+
+      const botText =
+        typeof data.message === 'string'
+          ? data.message
+          : typeof data.message?.text === 'string'
+            ? data.message.text
+            : 'Ошибка: неправильный формат ответа';
+
+
+      const replies = (data.followUps || []).slice(0, 2); // максимум 2 кнопки
+
+      const botMessage = {
+        id: (Date.now() + 1).toString(),
+        text: botText,
+        isMyMessage: false,
+        time,
+        replies,
+      };
+
+      const extraMessage = data.extra?.text
+        ? {
+            id: (Date.now() + 2).toString(),
+            text: data.extra.text,
+            isMyMessage: false,
+            time,
+          }
+        : null;
+
+      setMessages((prev) =>
+        extraMessage
+          ? [extraMessage, botMessage, ...prev]
+          : [botMessage, ...prev]
+      );
+
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 100);
+
+    } catch (error) {
+      console.error('Ошибка при отправке ответа от reply-кнопки:', error);
+    }
   };
+
 
 
   
@@ -116,16 +230,18 @@ export default function Chat() {
             setBubbleHeight(height);
           }}
         >
-          <Text style={message.isMyMessage ? styles.myMessageText : styles.otherMessageText}>
-            {message.text}
-          </Text>
+        <RenderHTML
+          contentWidth={width}
+          source={{ html: `<div>${message.text}</div>` }}
+          baseStyle={message.isMyMessage ? styles.myMessageText : styles.otherMessageText}
+        />
           <Text style={styles.messageTime}>{message.time}</Text>
         </View>
 
         {message.replies?.map((reply, idx) => (
           <TouchableOpacity
             key={idx}
-            onPress={() => handleReply(reply, message.id)}
+            onPress={() => handleReply(reply.value, message.id)}
             style={[
               styles.replyButton,
               {
@@ -134,9 +250,10 @@ export default function Chat() {
               }
             ]}
           >
-            <Text style={styles.replyText}>{reply}</Text>
+            <Text style={styles.replyText}>{reply.label}</Text>
           </TouchableOpacity>
         ))}
+
       </View>
     </View>
   );
@@ -230,7 +347,7 @@ export default function Chat() {
             <TouchableOpacity
               style={styles.ButtonOfSend}
               onPress={handleSend}
-              disabled={!message.trim()}
+              disabled={!message.trim() || isLoading}
             >
               <Ionicons
                 name='arrow-forward'
@@ -242,50 +359,11 @@ export default function Chat() {
         </KeyboardAvoidingView>
 
 
-        {/* Нижняя навигация */}
-        {(Platform.OS === 'ios' || !isKeyboardVisible) && (
-          <View style={styles.bottomNavBar}>
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              const IconComponent = tab.iconSet;
-
-              return (
-                <TouchableOpacity
-                  key={tab.id}
-                  style={styles.navButton}
-                  onPress={() => setActiveTab(tab.id)}
-                >
-                  <View style={[
-                    tab.iconStyle.customStyle,
-                    isActive && {
-                      backgroundColor: '#0046F8',
-                      borderRadius: 20,
-                      width: 80,
-                      height: 40,
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }
-                  ]}>
-                    <IconComponent
-                      name={tab.icon}
-                      size={tab.iconStyle.size}
-                      color={isActive ? tab.iconStyle.activeColor : tab.iconStyle.inactiveColor}
-                    />
-                  </View>
-
-                  <Text style={[
-                    styles.navText,
-                    {
-                      color: isActive ? 'black' : 'black'
-                    }
-                  ]}>
-                    {tab.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
+        <BottomNavBar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        keyboardOffset={keyboardHeight}
+        />
 
 
         <StatusBar style="auto" />
@@ -364,40 +442,6 @@ const styles = StyleSheet.create({
 
   },
   
-  // ------------------------------------------------Нижняя навигационная панель----------------------------------------------------------------------------
-  
-  
-  bottomNavBar: {
-    flexDirection: 'row', 
-    justifyContent: 'space-around', 
-    alignItems: 'center',
-    paddingVertical: 10,
-    backgroundColor: '#F9FAFC',
-  },
-
-  // Кнопка в нижней панели
-  navButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    width: '33%',
-  },
-
-  // Иконка внутри кнопки нижней панели
-  navIcon: {
-    width: '30%',
-    height: undefined,
-    aspectRatio: 1, 
-    resizeMode: 'contain',
-  },
-
-  // Текст под иконкой в нижней панели
-  navText: {
-    fontSize: 12,
-    color: '#333',
-  },
-
 
 
   // ---------------------------------------------------------Контейнер всех сообщений (отступы)----------------------------------------------------------------------

@@ -1,41 +1,34 @@
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { Dimensions } from 'react-native';
-const { width, height } = Dimensions.get('window');
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import recipes from '../AllBackEnd/RecipesForTesty';
 import React, { useState } from 'react';
 import RenderHTML from 'react-native-render-html';
 import { useWindowDimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
 
 
-
-
-export default function TestyAndHealthy({ visible, onClose }) {
-
+export default function InMotivationApi({ visible, onClose }) {
     const [loading, setLoading] = useState(false); 
 
-    const [currentRecipe, setCurrentRecipe] = useState("Можно получить рецепт при нажатии на кнопку еще!!!");
+    const [currentMotivation, setCurrentMotivation] = useState("Нажмите на кнопку ниже и мы сгенерируем мотивацию");
 
-  const handleCopy = async () => {
-    await Clipboard.setStringAsync(currentRecipe);
-  };
-
-    const handleGetRecipe = async () => {
+    const handleGetMotivation = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.1.103:3000/recipe');
+            const response = await fetch('http://192.168.1.103:3000/motivation');
             const data = await response.json();
-            setCurrentRecipe(data.message);
+            setCurrentMotivation(data.message);
         } catch (error) {
             console.error(error);
-            setCurrentRecipe("Произошла ошибка, попробуй еще раз!");
+            setCurrentMotivation("Произошла ошибка, попробуй еще раз!");
         } finally {
             setLoading(false)
         }
-    };  
+    };
+
 
 
   return (
@@ -51,8 +44,8 @@ export default function TestyAndHealthy({ visible, onClose }) {
             <View style = {styles.modalBox}>
                 <View style = {styles.TopBlock}>
                     <View style = {{flex: 1}}>
-                        <Text style = {styles.TestyAndHealthy}>Вкусно и полезно</Text>
-                        <Text style = {styles.Recept}>Сбалансированный рецепт, адаптированный под ваши цели</Text>
+                        <Text style = {styles.TestyAndHealthy}>Мотивация</Text>
+                        <Text style = {styles.Recept}>Умный помощник создает совет, адаптированный под ваши цели</Text>
                     </View>
 
                     <View>
@@ -66,17 +59,10 @@ export default function TestyAndHealthy({ visible, onClose }) {
                 <ScrollView style={styles.scrollView}>
                 <RenderHTML
                     contentWidth={width}
-                    source={{ html: `<div>${currentRecipe}</div>` }}
+                    source={{ html: `<div>${currentMotivation}</div>` }}
                     baseStyle={styles.scrollText}
                 />
                 </ScrollView>
-                </View>
-
-                <View style = {styles.BottomBlock}>
-                    <TouchableOpacity style = {styles.copy} onPress={handleCopy}>
-                        <Ionicons name='copy-outline' size={24} color={"black"} />
-                        <Text style = {styles.textCopy}>Скопировать</Text>
-                    </TouchableOpacity>
                 </View>
 
 
@@ -85,11 +71,9 @@ export default function TestyAndHealthy({ visible, onClose }) {
                         styles.MoreVariants,
                         loading && styles.MoreVariantsDisabled
                     ]}
-                    onPress={handleGetRecipe}
+                    onPress={handleGetMotivation}
                     disabled = {loading}>
-
-                        <Ionicons name='sync-outline' size={24} color={"white"} />
-                        <Text style = {styles.TextVariants}>{loading ? "Генерируем..." : "Еще варианты"}</Text>
+                        <Text style = {styles.TextVariants}>{loading ? "Генерируем..." : "Получить дозу мотивации"}</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -105,14 +89,13 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center"
     },
-
     MoreVariantsDisabled: {
         backgroundColor: '#A0A0A0',
     },
 
     modalBox: {
         width: width * 0.95,
-        height: height * 0.75,
+        height: height * 0.45,
         backgroundColor: "white",
         borderRadius: 20,
         padding: 20,
@@ -156,7 +139,7 @@ const styles = StyleSheet.create({
         paddingTop: 15
     },
     scrollView: {
-        height: height * 0.4,
+        height: height * 0.2,
         backgroundColor: "#E6EDFF",
         borderRadius: 20,
     },
@@ -165,28 +148,7 @@ const styles = StyleSheet.create({
         padding: 12,
         fontWeight: "400",
     },
-
-    BottomBlock:{
-        marginTop: 4
-    },
-
-    copy: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#E6EDFF",
-        marginTop: 8,
-        borderRadius: 20,
-        gap: 8,
-        height: height * 0.065
-    },
-
-    textCopy: {
-        fontSize: 16,
-        fontWeight: "500"
-    },
     
-
     Variants:{
         marginTop: 'auto'
     },

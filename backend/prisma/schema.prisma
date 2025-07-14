@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model User {
+//   id        String   @id @default(cuid())
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @updatedAt @map("updated_at")
+
+//   email    String @unique
+//   password String
+
+//   name       String @unique
+//   avatarPath String @default("/uploads/default-avatar.png") @map("avatar_path")
+
+//   phone String @default("")
+
+//   @@map("user")
+// }
+
+model Dish {
+  id          Int      @id @default(autoincrement())
+  username    String
+  telegram_id String
+  date_act    DateTime
+  dish_name   String
+  calories    Int
+  belki       Int
+  zhiri       Int
+  uglevodi    Int
+  weight      Int
+  path_image  String
+}

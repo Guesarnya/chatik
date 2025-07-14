@@ -1,12 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native'; 
 import { useRoute, useFocusEffect } from '@react-navigation/native';
 import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const { height, width } = Dimensions.get('window');
+const isSmallScreen = width < 380; // Флаг для маленьких экранов
 
 export default function Biometry() {
   const handleSend = () => {
@@ -90,7 +92,7 @@ export default function Biometry() {
           {/* Кнопки */}
           <View style={styles.BottomButtons}>
             {/* Вес */}
-            <TouchableOpacity style={styles.kilo} onPress={handleSendKilo}>
+            <TouchableOpacity style={[styles.kilo, isSmallScreen && styles.kiloSmall]} onPress={handleSendKilo}>
               <View style={styles.FirstButtonTextRow}>
                 <Text style={styles.textKilo}>{weight}</Text>
                 <Text style={styles.KG}>КГ</Text>
@@ -98,7 +100,7 @@ export default function Biometry() {
             </TouchableOpacity>
 
             {/* Цель */}
-            <TouchableOpacity style={styles.kilo} onPress={handleSendDieta}>
+            <TouchableOpacity style={[styles.kilo, isSmallScreen && styles.kiloSmall]} onPress={handleSendDieta}>
               <View style={styles.FirstButtonText}>
                 <Text 
                   style={styles.textKilo}
@@ -111,7 +113,7 @@ export default function Biometry() {
             </TouchableOpacity>
 
             {/* Активность */}
-            <TouchableOpacity style={styles.kilo} onPress={handleSendAktive}>
+            <TouchableOpacity style={[styles.kilo, isSmallScreen && styles.kiloSmall]} onPress={handleSendAktive}>
               <View style={styles.FirstButtonText}>
                 <Text 
                   style={styles.textKilo}
@@ -167,10 +169,10 @@ const styles = StyleSheet.create({
   },
 
   BottomButtons: {
-    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     borderRadius: 20,
-    alignItems: 'center',  
-    justifyContent: "flex-end"
   },
 
   FirstButtonText: {
@@ -194,7 +196,12 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 4,
-    height: 46
+    height: 46 // стандартная высота
+  },
+
+  kiloSmall: {
+    height: 30,  // уменьшаем высоту на маленьких экранах
+    paddingVertical: 6,
   },
 
   textKilo: {

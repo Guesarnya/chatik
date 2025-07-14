@@ -1,16 +1,18 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import InMotivationApi from './InMotivationApi';
+import React, { useState } from 'react';
 
 const { width } = Dimensions.get('window');
 
 export default function Motivation() {
-  const handleMotivationPress = () => {
-    console.log("Мотивация");
-  };
+  const [modalVisible, setModalVisible] = useState(false);
+
+  
 
   return (
-    <TouchableOpacity style={styles.button} onPress={handleMotivationPress}>
+    <>
+    <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
       <SafeAreaProvider>
         <View style={styles.container}>
           <Text style={styles.motivationLabel}>Мотивация</Text>
@@ -24,6 +26,9 @@ export default function Motivation() {
         </View>
       </SafeAreaProvider>
     </TouchableOpacity>
+
+    <InMotivationApi visible={modalVisible} onClose={() => setModalVisible(false)} />
+    </>
   );
 }
 

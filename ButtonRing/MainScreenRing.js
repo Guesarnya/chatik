@@ -1,47 +1,131 @@
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Dimensions,
   FlatList,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import Ring from './Ring';
 import DateSelector from './Date';
 import MenuItem from './Menu';
-import dishes from '../AllBackEnd/Dishes';
-import React, { useState, useMemo } from 'react';
+import SettingsModalContent from './SettingsModalContent'; // Убедись, что путь правильный
 
 const { width, height } = Dimensions.get('window');
 
 const MainScreenRing = () => {
-
   const isCompactRing = useMemo(() => width < 360 || height < 640, []);
+
+  const [dishes, setDishes] = useState([]);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedDish, setSelectedDish] = useState(null);
+  const [needsRefresh, setNeedsRefresh] = useState(false);
+
+  const fetchDishes = async () => {
+    try {
+      const response = await fetch('http://192.168.1.103:3000/dishes');
+      const data = await response.json();
+      setDishes(data);
+    } catch (error) {
+      console.error('Ошибка при получении блюд:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDishes();
+  }, []);
+
+  const openEditModal = (dish) => {
+    setSelectedDish(dish);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedDish(null);
+  };
+
+  const handleConfirmEdit = async () => {
+    await fetchDishes(); 
+    closeModal();         
+  };
+
+
+  useFocusEffect(
+    useCallback(() => {
+      if (needsRefresh) {
+        fetchDishes();
+        setNeedsRefresh(false);
+      }
+    }, [needsRefresh])
+  );
+
+
+
+  const handleDelete = async (idToDelete) => {
+    try {
+      await fetch(`http://192.168.1.103:3000/api/delete_card?card_id=${idToDelete}`);
+      await fetchDishes();
+      setDishes(prev => prev.filter(d => d.id !== idToDelete));
+    } catch (error) {
+      console.error('Ошибка при удалении блюда:', error);
+    }
+  };
+
+
 
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
         <View style={styles.topBlock}>
-          <Ring isSmall = {isCompactRing} />
+          <Ring isSmall={isCompactRing} />
         </View>
+
         <DateSelector style={styles.dateSelector} />
+
         <FlatList
-          style = {styles.FlatList}
+          style={styles.FlatList}
           data={dishes}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <MenuItem
-              name={item.name}
-              kcal={item.kcal}
-              protein={item.protein}
-              fat={item.fat}
-              carbs={item.carbs}
-              image={item.image}
-            />
+          <MenuItem
+            id={item.id}
+            name={item.name}
+            kcal={item.kcal}
+            protein={item.protein}
+            fat={item.fat}
+            carbs={item.carbs}
+            image={{ uri: item.image }}
+            onPress={() => openEditModal(item)}
+            onDelete={() => handleDelete(item.id)}
+            onSettingsConfirm={handleConfirmEdit}
+          />
           )}
           contentContainerStyle={styles.listContent}
         />
+
+        <Modal visible={isModalVisible} transparent animationType="slide">
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalBackground}>
+              <View style={styles.modalContent}>
+                {selectedDish && (
+                  <SettingsModalContent
+                    cardId={selectedDish.id}
+                    dishName={selectedDish.name}
+                    onClose={closeModal}
+                    onConfirm={handleConfirmEdit}
+                  />
+                )}
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -63,7 +147,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 20,
     marginBottom: 4,
-    paddingHorizontal: 8
+    paddingHorizontal: 8,
   },
   dateSelector: {
     marginTop: 12,
@@ -71,10 +155,21 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 24,
   },
-
   FlatList: {
     marginTop: 10,
     borderRadius: 20,
     paddingHorizontal: 10,
-  }
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+    maxHeight: height * 0.7,
+  },
 });
