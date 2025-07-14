@@ -13,15 +13,14 @@ export class OpenaiService {
 
   private markdownToHTML(text: string): string {
     return text
-      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')     // **bold**
-      .replace(/\*(.*?)\*/g, '<i>$1</i>')         // *italic*
-      .replace(/__(.*?)__/g, '<u>$1</u>')         // __underline__
-      .replace(/~~(.*?)~~/g, '<s>$1</s>')         // ~~strikethrough~~
-      .replace(/\n/g, '<br/>');                   // newline to <br/>
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\*(.*?)\*/g, '<i>$1</i>')
+      .replace(/__(.*?)__/g, '<u>$1</u>')
+      .replace(/~~(.*?)~~/g, '<s>$1</s>')
+      .replace(/\n/g, '<br/>');
   }
 
 
-  // Метод для получения мотивации
   async getMotivation() {
     const completion = await this.openai.chat.completions.create({
       model: 'gpt-4o',
@@ -37,7 +36,6 @@ export class OpenaiService {
     return { message: formatted };
   }
 
-  // Метод для генерации рецепта
   async getRecipe() {
     const completion = await this.openai.chat.completions.create({
       model: 'gpt-4o',
@@ -53,7 +51,6 @@ export class OpenaiService {
     return { message: formatted };
   }
 
-  // Метод для чата с follow-up
   async getChatResponseWithFollowUp(userMessage: string) {
     const completion = await this.openai.chat.completions.create({
       model: 'gpt-4o',

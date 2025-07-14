@@ -16,7 +16,7 @@ export class DishController {
       fat: dish.zhiri,
       carbs: dish.uglevodi,
       weight: dish.weight,
-      image: `https://xn--d1arx6a.xn--p1ai/api/public/${dish.path_image}`, // ✅ вот правильно
+      image: `https://xn--d1arx6a.xn--p1ai/api/public/${dish.path_image}`,
     }));
   }
 }

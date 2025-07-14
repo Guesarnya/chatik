@@ -24,9 +24,9 @@ export default function Health() {
 
   const getPatternFill = () => 'url(#grad)';
 
-  // 👉 Динамическая высота:
+ 
   const baseHeight = 129;
-  const totalHeight = screenHeight < 700 ? baseHeight * 0.7 : baseHeight; // например, 30% меньше на маленьких экранах
+  const totalHeight = screenHeight < 700 ? baseHeight * 0.7 : baseHeight; 
 
   const progress = 76;
   const filledHeight = (progress / 100) * totalHeight;

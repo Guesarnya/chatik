@@ -40,7 +40,6 @@ export class RedactDishService {
     }
   }
 
-  // 👉 ДОБАВЬ ЭТО
   async getCard(card_id: number) {
     const baseUrl = 'https://xn--d1arx6a.xn--p1ai/api/get_card';
     const params = new URLSearchParams({

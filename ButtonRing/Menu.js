@@ -41,7 +41,7 @@ export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, o
   const handleSettingsAction = () => {
     handleCloseModal();
     if (onSettingsConfirm) {
-      onSettingsConfirm(); // ← вызываем коллбэк
+      onSettingsConfirm(); 
     }
   };
 

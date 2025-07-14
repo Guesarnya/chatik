@@ -74,6 +74,5 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   AndroidInput: {
-    // твои базовые стили
   },
 });

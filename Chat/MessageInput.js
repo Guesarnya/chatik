@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 
 export default function MessageInput() {
   const [message, setMessage] = useState('');
-  const [inputHeight, setInputHeight] = useState(50); // начальная высота
+  const [inputHeight, setInputHeight] = useState(50);
 
   const handleSend = () => {
     console.log("KUKU EPTA:", message);
     setMessage('');
-    setInputHeight(50); // сброс высоты
+    setInputHeight(50); 
   };
 
   return (

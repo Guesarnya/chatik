@@ -48,7 +48,7 @@ export default function Chat() {
     const trimmedMessage = message.trim();
     if (!trimmedMessage || isLoading) return;
 
-    setIsLoading(true); // Блокируем повторный ввод
+    setIsLoading(true); 
     const time = new Date().toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
@@ -65,7 +65,7 @@ export default function Chat() {
     setMessage('');
 
     try {
-      const response = await fetch('http://192.168.1.103:3000/chat/message', {
+      const response = await fetch('https://chatik-zp8f.onrender.com/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function Chat() {
     } catch (error) {
       console.error('Ошибка при отправке сообщения:', error);
     } finally {
-      setIsLoading(false); // Разблокируем ввод
+      setIsLoading(false); 
     }
   };
 
@@ -139,7 +139,7 @@ export default function Chat() {
     );
 
     try {
-      const response = await fetch('http://192.168.1.103:3000/chat/message', {
+      const response = await fetch('https://chatik-zp8f.onrender.com/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ export default function Chat() {
             : 'Ошибка: неправильный формат ответа';
 
 
-      const replies = (data.followUps || []).slice(0, 2); // максимум 2 кнопки
+      const replies = (data.followUps || []).slice(0, 2);
 
       const botMessage = {
         id: (Date.now() + 1).toString(),
@@ -373,19 +373,16 @@ export default function Chat() {
 }
 
 const styles = StyleSheet.create({
-  // Основной контейнер всего экрана
   container: {
     flex: 1,
     backgroundColor: '#F9FAFC',
   },
 
-  // Контейнер для области с сообщениями
   contentContainer: {
     flex: 1,
     backgroundColor: '#F1F3F6',
   },
 
-  // Стиль для FlatList с сообщениями
   flatList: {
     flex: 1,
   },

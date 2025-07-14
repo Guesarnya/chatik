@@ -8,7 +8,7 @@ import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height, width } = Dimensions.get('window');
-const isSmallScreen = width < 380; // Флаг для маленьких экранов
+const isSmallScreen = width < 380;
 
 export default function Biometry() {
   const handleSend = () => {
@@ -196,11 +196,11 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 4,
-    height: 46 // стандартная высота
+    height: 46 
   },
 
   kiloSmall: {
-    height: 30,  // уменьшаем высоту на маленьких экранах
+    height: 30,  
     paddingVertical: 6,
   },
 

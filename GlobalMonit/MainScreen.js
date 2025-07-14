@@ -73,7 +73,7 @@ export default function MainScreen() {
           {/* Верхний блок с кольцом */}
           <View style={[
             styles.topBlock,
-            isCompactRing && styles.topBlockSmall // Добавляем доп. стиль если экран маленький
+            isCompactRing && styles.topBlockSmall 
           ]}>
             <FirstRing isSmall={isCompactRing} />
           </View>
@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
   },
 
   topBlockSmall: {
-    height: height * 0.48, // Например, 20% от экрана
-    aspectRatio: undefined, // Чтобы aspectRatio не перебивал твою высоту
+    height: height * 0.48, 
+    aspectRatio: undefined, 
     width: "99%"
   },
 

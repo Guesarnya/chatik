@@ -121,7 +121,7 @@ export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName}) =>
                 return;
               }
 
-              const url = `http://192.168.1.103:3000/api/edit_card?card_id=${cardId}&belki=${parsedBelki}&zhiri=${parsedZhiri}&uglevodi=${parsedUglevodi}&kkal=${parsedKcal}`;
+              const url = `https://chatik-zp8f.onrender.com/api/edit_card?card_id=${cardId}&belki=${parsedBelki}&zhiri=${parsedZhiri}&uglevodi=${parsedUglevodi}&kkal=${parsedKcal}`;
 
               const response = await fetch(url);
               const data = await response.json();

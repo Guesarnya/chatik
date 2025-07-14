@@ -13,6 +13,6 @@ export class DishService {
       this.httpService.get<any>(`https://xn--d1arx6a.xn--p1ai/api/get_user?user_id=${userId}`)
     );
 
-    return data; // автоматически определит тип как any
+    return data;
   }
 }

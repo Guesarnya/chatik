@@ -14,7 +14,7 @@ import { useCallback } from 'react';
 import Ring from './Ring';
 import DateSelector from './Date';
 import MenuItem from './Menu';
-import SettingsModalContent from './SettingsModalContent'; // Убедись, что путь правильный
+import SettingsModalContent from './SettingsModalContent'; 
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,7 +28,7 @@ const MainScreenRing = () => {
 
   const fetchDishes = async () => {
     try {
-      const response = await fetch('http://192.168.1.103:3000/dishes');
+      const response = await fetch('https://chatik-zp8f.onrender.com/dishes');
       const data = await response.json();
       setDishes(data);
     } catch (error) {
@@ -69,7 +69,7 @@ const MainScreenRing = () => {
 
   const handleDelete = async (idToDelete) => {
     try {
-      await fetch(`http://192.168.1.103:3000/api/delete_card?card_id=${idToDelete}`);
+      await fetch(`https://chatik-zp8f.onrender.com/api/delete_card?card_id=${idToDelete}`);
       await fetchDishes();
       setDishes(prev => prev.filter(d => d.id !== idToDelete));
     } catch (error) {

@@ -18,7 +18,7 @@ export default function InMotivationApi({ visible, onClose }) {
     const handleGetMotivation = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.1.103:3000/motivation');
+            const response = await fetch('https://chatik-zp8f.onrender.com/motivation');
             const data = await response.json();
             setCurrentMotivation(data.message);
         } catch (error) {
