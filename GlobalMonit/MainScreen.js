@@ -7,7 +7,6 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 import Biometry from './Biometry';
@@ -23,52 +22,14 @@ import BottomNavBar from '../Chat/BottomNavigation';
 
 export default function MainScreen() {
 
+
   const navigation = useNavigation(); 
   const [activeTab, setActiveTab] = useState('map');
   const isCompactRing = useMemo(() => width < 360 || height < 640, []);
 
-  const tabs = [
-    {
-      id: 'map',
-      label: 'Map',
-      icon: 'map-marker',
-      iconSet: MaterialCommunityIcons,
-      iconStyle: {
-        size: 24,
-        activeColor: 'white',
-        inactiveColor: 'black',
-        customStyle: {},
-      },
-    },
-    {
-      id: 'notes',
-      label: 'Notes',
-      icon: 'bookmark-outline',
-      iconSet: MaterialCommunityIcons,
-      iconStyle: {
-        size: 24,
-        activeColor: 'white',
-        inactiveColor: 'black',
-        customStyle: {},
-      },
-    },
-    {
-      id: 'alerts',
-      label: 'Alerts',
-      icon: 'bell-outline',
-      iconSet: MaterialCommunityIcons,
-      iconStyle: {
-        size: 24,
-        activeColor: 'white',
-        inactiveColor: 'black',
-        customStyle: {},
-      },
-    },
-  ];
-
   return (
     <>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
           {/* Верхний блок с кольцом */}
           <View style={[
@@ -109,7 +70,7 @@ export default function MainScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F1F3F6',
+    backgroundColor: '#F9FAFC',
   },
 
   topBlockSmall: {
@@ -167,26 +128,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
   },
-  bottomNavBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 10,
-    backgroundColor: '#F9FAFC',
-    paddingBottom: Platform.select({
-      android: 10,
-      ios: 20
-    })
-  },
-  navButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '33%',
-  },
-  navText: {
-    fontSize: 12,
-    color: '#333',
-    marginTop: 2,
-  },
+
 });
 

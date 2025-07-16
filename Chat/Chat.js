@@ -1,14 +1,14 @@
-import { StyleSheet, Text, View, SafeAreaView,
+import { StyleSheet, Text, View,
    TouchableOpacity, KeyboardAvoidingView, Platform,
    Image, TextInput, Keyboard, Dimensions, FlatList,
    StatusBar, } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import BottomNavBar from './BottomNavigation';
 import RenderHTML from 'react-native-render-html';
 import { useWindowDimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 
@@ -261,50 +261,10 @@ export default function Chat() {
 
 
   const [activeTab, setActiveTab] = useState('map');
-  const tabs = [
-    {
-      id: 'map',
-      label: 'label',
-      icon: 'map-marker',
-      iconSet: MaterialCommunityIcons,
-      iconStyle: {
-        size: 24,
-        activeColor: "white",
-        inactiveColor: "black",
-        customStyle:{
-          
-        }
-      }
-    },
-    {
-      id: 'notes',
-      label: 'label',
-      icon: 'bookmark-outline',
-      iconSet: MaterialCommunityIcons,
-      iconStyle: {
-        size: 24,
-        activeColor: "white",
-        inactiveColor: "black",
-      },
-      
-    },
-    {
-      id: 'alerts',
-      label: 'label',
-      icon: 'bell-outline',
-      iconSet: MaterialCommunityIcons,
-      iconStyle: {
-        size: 24,
-        activeColor: "white",
-        inactiveColor: "black", 
-      }
-    }
-  ];
 
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
+     <SafeAreaView style = {styles.safeArea}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>FoodMood</Text>
         </View>
@@ -330,17 +290,20 @@ export default function Chat() {
 
         {/* Ввод сообщения */}
         <KeyboardAvoidingView
-          style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={[
+            styles.keyboardAvoidingView,
+            Platform.OS === 'android' && isKeyboardVisible && { marginBottom: keyboardHeight - 60}
+          ]}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.inputContainer}>
             <TextInput
-              placeholder='Написать сообщение...'
-              placeholderTextColor="#C8D0DC" 
+              placeholder="Написать сообщение..."
+              placeholderTextColor="#C8D0DC"
               style={styles.input}
               value={message}
               onChangeText={setMessage}
-              textAlignVertical='center'
+              textAlignVertical="center"
               multiline
             />
 
@@ -350,34 +313,28 @@ export default function Chat() {
               disabled={!message.trim() || isLoading}
             >
               <Ionicons
-                name='arrow-forward'
+                name="arrow-forward"
                 size={24}
-                color={message.trim() ? "#FFFFFF" : "#959195"}
+                color={message.trim() ? '#FFFFFF' : '#959195'}
               />
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-
-
         <BottomNavBar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
-        keyboardOffset={keyboardHeight}
         />
-
-
-        <StatusBar style="auto" />
       </SafeAreaView>
-    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+
+  safeArea: {
     flex: 1,
     backgroundColor: '#F9FAFC',
   },
-
+  
   contentContainer: {
     flex: 1,
     backgroundColor: '#F1F3F6',
@@ -392,7 +349,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingHorizontal: 16,
     backgroundColor: '#F9FAFC',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
 
   headerTitle: {

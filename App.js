@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import MainScreen from './GlobalMonit/MainScreen';
 import Chat from './Chat/Chat'; 
 import MainScreenRing from './ButtonRing/MainScreenRing';
@@ -9,6 +8,8 @@ import { MacroProvider } from './AllBackEnd/MacroContext';
 import TestyAndHealthy from './GlobalMonit/TestyAndHealthy';
 import ButtonBiometry from './InGLobalMonit/ButtonBiometry'
 import { TabProvider } from './AllBackEnd/TabContext';
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 
 const Stack = createNativeStackNavigator();
 
@@ -17,12 +18,18 @@ export default function App() {
     <MacroProvider>
       <TabProvider>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="MainScreen">
-            <Stack.Screen name="MainScreen" component={MainScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }} />
-            <Stack.Screen name='MainScreenRing' component={MainScreenRing} options={{ headerShown: false }}/>
-            <Stack.Screen name='TestyAndHealthy' component={TestyAndHealthy} options={{ headerShown: false }}/>
-            <Stack.Screen name='ButtonBiometry' component={ButtonBiometry} options={{ headerShown: false }}/>
+          <Stack.Navigator
+            initialRouteName="MainScreen"
+            screenOptions={{
+              headerShown: false,
+              animation: 'slide_from_right', // по умолчанию
+            }}
+          >
+            <Stack.Screen name="MainScreen" component={MainScreen} />
+            <Stack.Screen name="Chat" component={Chat} />
+            <Stack.Screen name="MainScreenRing" component={MainScreenRing} />
+            <Stack.Screen name="TestyAndHealthy" component={TestyAndHealthy} />
+            <Stack.Screen name="ButtonBiometry" component={ButtonBiometry} />
           </Stack.Navigator>
         </NavigationContainer>
       </TabProvider>
