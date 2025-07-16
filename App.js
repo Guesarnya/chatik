@@ -22,7 +22,7 @@ export default function App() {
             initialRouteName="MainScreen"
             screenOptions={{
               headerShown: false,
-              animation: 'slide_from_right', // по умолчанию
+              animation: 'slide_from_right',
             }}
           >
             <Stack.Screen name="MainScreen" component={MainScreen} />

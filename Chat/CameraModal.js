@@ -1,4 +1,3 @@
-// CameraModal.js
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions, TouchableWithoutFeedback, Platform } from 'react-native';
 
