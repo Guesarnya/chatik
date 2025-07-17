@@ -3,11 +3,12 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-export default function DateSelector({onDateChange}) {
+export default function DateSelector({ onDateChange }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [daysOfWeek, setDaysOfWeek] = useState([]);
   const flatListRef = useRef(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null); 
 
   const getCurrentWeek = (dateRef = new Date()) => {
     const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
@@ -33,41 +34,52 @@ export default function DateSelector({onDateChange}) {
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
 
-  const handleConfirm = (date) => {
-    hideDatePicker();
+const handleConfirm = (date) => {
+  hideDatePicker();
 
-    const week = getCurrentWeek(date);
-    const todayIndex = week.findIndex(
-      (item) =>
-        item.date === date.getDate() &&
-        item.month === date.getMonth() &&
-        item.year === date.getFullYear()
-    );
+  const week = getCurrentWeek(date);
 
-    const indices = [...Array(week.length).keys()];
-    const randomTwo = indices.sort(() => 0.5 - Math.random()).slice(0, 2);
 
-    const withWeekendFlags = week.map((item, index) => ({
-      ...item,
-      isWeekend: randomTwo.includes(index),
-    }));
+  const todayIndex = week.findIndex(
+    (item) =>
+      item.date === date.getDate() &&
+      item.month === date.getMonth() &&
+      item.year === date.getFullYear()
+  );
 
-    setDaysOfWeek(withWeekendFlags);
-    setSelectedIndex(todayIndex);
 
-    if (todayIndex !== -1) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToIndex({ index: todayIndex, animated: true });
-      }, 100);
-    }
+  const indices = [...Array(week.length).keys()];
+  const randomTwo = indices.sort(() => 0.5 - Math.random()).slice(0, 2);
 
-if (onDateChange) {
-  const fixedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12); // фикс
-  console.log("📆 Выбрана дата через календарь:", fixedDate.toISOString());
-  onDateChange(fixedDate);
-}
+  const withWeekendFlags = week.map((item, index) => ({
+    ...item,
+    isWeekend: randomTwo.includes(index),
+  }));
 
-  };
+  setDaysOfWeek(withWeekendFlags);
+  setSelectedIndex(todayIndex);
+
+
+  const formattedDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    .toISOString()
+    .split('T')[0];
+  setSelectedDate(formattedDate);
+
+
+  if (onDateChange) {
+    onDateChange(formattedDate);
+  }
+
+  console.log('Выбранная дата:', formattedDate);
+
+  if (todayIndex !== -1) {
+    setTimeout(() => {
+      flatListRef.current?.scrollToIndex({ index: todayIndex, animated: true });
+    }, 100);
+  }
+};
+
+
 
   useEffect(() => {
     const generatedWeek = getCurrentWeek();
@@ -99,6 +111,19 @@ if (onDateChange) {
     }
   }, []);
 
+  const handleDayPress = (index, item) => {
+    setSelectedIndex(index);
+    
+    const formattedDate = new Date(Date.UTC(item.year, item.month, item.date)).toISOString().split('T')[0];
+    setSelectedDate(formattedDate);
+    
+    if (onDateChange) {
+      onDateChange(formattedDate);
+    }
+    
+    console.log('Выбранная дата при нажатии на кнопку:', formattedDate);
+  };
+
   return (
     <View style={styles.wrapper}> 
       <View style={styles.roundedContainer}>
@@ -118,13 +143,7 @@ if (onDateChange) {
           return (
             <TouchableOpacity
               style={[styles.buttonContainer, selected && styles.selectedButtonContainer]}
-onPress={() => {
-  setSelectedIndex(index);
-  const selectedDate = new Date(item.year, item.month, item.date, 12);
-  console.log("🖱 Нажата дата из списка:", selectedDate.toISOString());
-  onDateChange?.(selectedDate);
-}}
-
+              onPress={() => handleDayPress(index, item)}
               activeOpacity={0.8}
             >
               <Text

@@ -6,7 +6,7 @@ import { SettingsModalContent } from "./SettingsModalContent"
 import { TrashModalContent } from "./TrashModalContent"
 
 
-export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, onDelete, onSettingsConfirm  }) {
+export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, onDelete, onSettingsConfirm, date_act }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState(''); 
 
