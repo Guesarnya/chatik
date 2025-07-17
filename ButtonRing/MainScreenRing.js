@@ -7,6 +7,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
+  Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,7 +15,7 @@ import { useCallback } from 'react';
 import Ring from './Ring';
 import DateSelector from './Date';
 import MenuItem from './Menu';
-import SettingsModalContent from './SettingsModalContent'; 
+import SettingsModalContent from './SettingsModalContent';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,25 +26,43 @@ const MainScreenRing = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedDish, setSelectedDish] = useState(null);
   const [needsRefresh, setNeedsRefresh] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date()); // выбранная дата
 
-  const fetchDishes = async () => {
-    try {
-      const response = await fetch('https://chatik-zp8f.onrender.com/dishes');
-      const data = await response.json();
-      setDishes(data);
-    } catch (error) {
-      console.error('Ошибка при получении блюд:', error);
-    }
+const fetchDishes = async () => {
+  try {
+    const response = await fetch('https://chatik-zp8f.onrender.com/dishes');
+    const data = await response.json();
+    
+    // Логируем данные, которые получаем с сервера
+    console.log("📡 Полученные данные с сервера: ", data);
+    
+    setDishes(data); // сохраняем данные в состоянии
+  } catch (error) {
+    console.error('Ошибка при получении блюд:', error);
+  }
+};
+
+
+  useEffect(() => {
+    fetchDishes();
+  }, []);
+
+  // Функция для сравнения дат (без учета времени)
+  const isSameDay = (date1, date2) => {
+    return (
+      date1.getFullYear() === date2.getFullYear() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate()
+    );
   };
 
-useEffect(() => {
-  if (filteredDishes.length === 0) {
-    console.log(`⚠️ Нет данных на дату: ${selectedDate.toLocaleDateString('en-CA')}`);
-  } else {
-    console.log(`✅ ${filteredDishes.length} блюд на ${selectedDate.toISOString().slice(0, 10)}`);
-  }
-}, [filteredDishes, selectedDate]);
-
+  // Фильтрация блюд по выбранной дате
+  const filteredDishes = useMemo(() => {
+    return dishes.filter((dish) => {
+      const dishDate = new Date(dish.date_act); // Преобразуем строку из сервера в объект Date
+      return isSameDay(dishDate, selectedDate); // Сравниваем с выбранной датой
+    });
+  }, [dishes, selectedDate]);
 
   const openEditModal = (dish) => {
     setSelectedDish(dish);
@@ -60,18 +79,6 @@ useEffect(() => {
     closeModal();         
   };
 
-
-  useFocusEffect(
-    useCallback(() => {
-      if (needsRefresh) {
-        fetchDishes();
-        setNeedsRefresh(false);
-      }
-    }, [needsRefresh])
-  );
-
-
-
   const handleDelete = async (idToDelete) => {
     try {
       await fetch(`https://chatik-zp8f.onrender.com/api/delete_card?card_id=${idToDelete}`);
@@ -82,20 +89,11 @@ useEffect(() => {
     }
   };
 
-
-
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-const filteredDishes = useMemo(() => {
-  const selectedDateStr = selectedDate.toLocaleDateString('en-CA');
-  return dishes.filter(dish => {
-    const dishDateStr = new Date(dish.date_act).toLocaleDateString('en-CA');
-    return dishDateStr === selectedDateStr;
-  });
-}, [dishes, selectedDate]);
-
-
-
+  // Обработчик изменения даты из DateSelector
+  const handleDateChange = (date) => {
+    console.log("📆 Выбрана дата:", date);
+    setSelectedDate(date);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -104,25 +102,32 @@ const filteredDishes = useMemo(() => {
           <Ring isSmall={isCompactRing} />
         </View>
 
-        <DateSelector style={styles.dateSelector} onDateChange={setSelectedDate} />
+        {/* Компонент выбора даты */}
+        <DateSelector onDateChange={handleDateChange} />
 
+        {/* Отображаем выбранную дату */}
+        <Text style={styles.selectedDateText}>
+          Выбранная дата: {selectedDate.toLocaleDateString()}
+        </Text>
+
+        {/* Отображаем блюда, соответствующие выбранной дате */}
         <FlatList
           style={styles.FlatList}
           data={filteredDishes}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-          <MenuItem
-            id={item.id}
-            name={item.name}
-            kcal={item.kcal}
-            protein={item.protein}
-            fat={item.fat}
-            carbs={item.carbs}
-            image={{ uri: item.image }}
-            onPress={() => openEditModal(item)}
-            onDelete={() => handleDelete(item.id)}
-            onSettingsConfirm={handleConfirmEdit}
-          />
+            <MenuItem
+              id={item.id}
+              name={item.name}
+              kcal={item.kcal}
+              protein={item.protein}
+              fat={item.fat}
+              carbs={item.carbs}
+              image={{ uri: item.image }}
+              onPress={() => openEditModal(item)}
+              onDelete={() => handleDelete(item.id)}
+              onSettingsConfirm={handleConfirmEdit}
+            />
           )}
           contentContainerStyle={styles.listContent}
         />

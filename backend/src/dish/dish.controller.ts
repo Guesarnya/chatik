@@ -10,6 +10,7 @@ export class DishController {
     const dishes = await this.dishService.findAll();
     return dishes.map(dish => ({
       id: dish.id,
+      date_act: dish.date_act,
       name: dish.dish_name,
       kcal: dish.calories,
       protein: dish.belki,
@@ -17,7 +18,6 @@ export class DishController {
       carbs: dish.uglevodi,
       weight: dish.weight,
       image: `https://xn--d1arx6a.xn--p1ai/api/public/${dish.path_image}`,
-      date_act: dish.date_act, 
     }));
   }
 }
