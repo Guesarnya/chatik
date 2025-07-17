@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-export default function DateSelector() {
+export default function DateSelector({onDateChange}) {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [daysOfWeek, setDaysOfWeek] = useState([]);
   const flatListRef = useRef(null);
@@ -60,6 +60,13 @@ export default function DateSelector() {
         flatListRef.current?.scrollToIndex({ index: todayIndex, animated: true });
       }, 100);
     }
+
+if (onDateChange) {
+  const fixedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12); // фикс
+  console.log("📆 Выбрана дата через календарь:", fixedDate.toISOString());
+  onDateChange(fixedDate);
+}
+
   };
 
   useEffect(() => {
@@ -111,7 +118,13 @@ export default function DateSelector() {
           return (
             <TouchableOpacity
               style={[styles.buttonContainer, selected && styles.selectedButtonContainer]}
-              onPress={() => setSelectedIndex(index)}
+onPress={() => {
+  setSelectedIndex(index);
+  const selectedDate = new Date(item.year, item.month, item.date, 12);
+  console.log("🖱 Нажата дата из списка:", selectedDate.toISOString());
+  onDateChange?.(selectedDate);
+}}
+
               activeOpacity={0.8}
             >
               <Text

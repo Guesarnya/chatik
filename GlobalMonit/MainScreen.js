@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 20,
     marginBottom: 4,
-    width: "99%"
+    width: "100%"
   },
   columns: {
     flex: 1,

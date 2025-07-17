@@ -36,9 +36,14 @@ const MainScreenRing = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDishes();
-  }, []);
+useEffect(() => {
+  if (filteredDishes.length === 0) {
+    console.log(`⚠️ Нет данных на дату: ${selectedDate.toLocaleDateString('en-CA')}`);
+  } else {
+    console.log(`✅ ${filteredDishes.length} блюд на ${selectedDate.toISOString().slice(0, 10)}`);
+  }
+}, [filteredDishes, selectedDate]);
+
 
   const openEditModal = (dish) => {
     setSelectedDish(dish);
@@ -79,6 +84,18 @@ const MainScreenRing = () => {
 
 
 
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+const filteredDishes = useMemo(() => {
+  const selectedDateStr = selectedDate.toLocaleDateString('en-CA');
+  return dishes.filter(dish => {
+    const dishDateStr = new Date(dish.date_act).toLocaleDateString('en-CA');
+    return dishDateStr === selectedDateStr;
+  });
+}, [dishes, selectedDate]);
+
+
+
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -87,11 +104,11 @@ const MainScreenRing = () => {
           <Ring isSmall={isCompactRing} />
         </View>
 
-        <DateSelector style={styles.dateSelector} />
+        <DateSelector style={styles.dateSelector} onDateChange={setSelectedDate} />
 
         <FlatList
           style={styles.FlatList}
-          data={dishes}
+          data={filteredDishes}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
           <MenuItem
