@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   topBlockSmall: {
     height: height * 0.48, 
     aspectRatio: undefined, 
-    width: "99%"
+    width: "100%"
   },
 
   container: {

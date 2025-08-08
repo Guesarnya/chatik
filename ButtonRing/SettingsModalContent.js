@@ -1,6 +1,7 @@
 import React, { useState, forwardRef, useRef } from 'react';
-import { View, Text, Button , Dimensions, StyleSheet, TextInput, TouchableOpacity, Alert} from 'react-native';
-const { width, height } = Dimensions.get("window")
+import { View, Text, Button, Dimensions, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+
+const { width, height } = Dimensions.get("window");
 
 const FloatingLabelInput = forwardRef(({ label, value, onChangeText, placeholder, onSubmitEditing, returnKeyType = "next" }, ref) => {
   const handleChangeText = (text) => {
@@ -45,7 +46,7 @@ const floatingStyles = StyleSheet.create({
   },
 });
 
-export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName}) => {
+export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName }) => {
   const [belki, setBelki] = useState('');
   const [szhiri, setSzhiri] = useState('');
   const [uglevodi, setUglevodi] = useState('');
@@ -55,15 +56,34 @@ export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName}) =>
   const carbRef = useRef();
   const kcalRef = useRef();
 
+  const isSmallScreen = height < 700;
+
+  const modalStyles = StyleSheet.create({
+    container: {
+      height: isSmallScreen ? height * 0.72 : height * 0.58,
+    },
+    middleBlock: {
+      paddingHorizontal: 10,
+      marginTop: isSmallScreen ? 0 : 10, 
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      marginTop: "auto",
+      gap: 12,
+      paddingHorizontal: 10,
+      paddingBottom: 10,
+    },
+  });
 
   return (
-    <View style={styles.container}>
+    <View style={modalStyles.container}>
       <View style={styles.topBlock}>
         <Text style={styles.mainLabel}>Изменить блюдо</Text>
         <Text style={styles.name}>{dishName}</Text>
       </View>
 
-      <View style={styles.middleBlock}>
+      <View style={modalStyles.middleBlock}>
         <FloatingLabelInput
           label="Белки"
           value={belki}
@@ -97,7 +117,7 @@ export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName}) =>
         />
       </View>
 
-      <View style={styles.buttonRow}>
+      <View style={modalStyles.buttonRow}>
         <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
           <Text style={styles.buttonText}>Отменить</Text>
         </TouchableOpacity>
@@ -121,7 +141,7 @@ export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName}) =>
                 return;
               }
 
-              const url = `https://chatik-zp8f.onrender.com/api/edit_card?card_id=${cardId}&belki=${parsedBelki}&zhiri=${parsedZhiri}&uglevodi=${parsedUglevodi}&kkal=${parsedKcal}`;
+              const url = `https://chatik-1.onrender.com/api/edit_card?card_id=${cardId}&belki=${parsedBelki}&zhiri=${parsedZhiri}&uglevodi=${parsedUglevodi}&kkal=${parsedKcal}`;
 
               const response = await fetch(url);
               const data = await response.json();
@@ -152,28 +172,23 @@ const styles = StyleSheet.create({
   container: {
     height: height * 0.58
   },
-
   topBlock: {
     padding: 2
   },
-
   mainLabel: {
     fontSize: 24,
     fontWeight: "400"
   },
-
   name: {
     marginTop: 10,
     fontSize: 14,
     fontWeight: "400",
     marginBottom: 16
   },
-
   middleBlock: {
     paddingHorizontal: 10,
     marginTop: 10,
   },
-
   buttonRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -182,23 +197,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingBottom: 10
   },
-
   button: {
     backgroundColor: "white",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10
   },
-
   cancelButton: {
     backgroundColor: "white"
   },
-
   buttonText: {
     color: "black",
     fontSize: 14,
     fontWeight: "500"
   }
-
-
 });

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Circle, Defs, LinearGradient, Stop, Mask, Pattern, Rect, Line, G, Path, ClipPath } from 'react-native-svg';
 import { SettingsModalContent } from "./SettingsModalContent"
 import { TrashModalContent } from "./TrashModalContent"
 
+const { width } = Dimensions.get("window")
 
 export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, onDelete, onSettingsConfirm, date_act }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -63,18 +63,30 @@ export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, o
         </View>
       </View>
 
-      <View style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        marginLeft: 10
-      }}>
-        <MacroProgressBar label="Б" value={protein} max={macroGrams.protein} type="protein" width={barWidth} />
-        <MacroProgressBar label="Ж" value={fat} max={macroGrams.fat} type="fat" width={barWidth} />
-        <MacroProgressBar label="У" value={carbs} max={macroGrams.carb} type="carb" width={barWidth} />
+
+      <View style={styles.BJU}>
+        <View style={styles.bjuItem}>
+          <Text style={styles.bjuTitle}>Белок</Text>
+          <View style={styles.blocks}>
+            <Text style={styles.BJULabel}>{protein}</Text>
+          </View>
+        </View>
+
+        <View style={styles.bjuItem}>
+          <Text style={styles.bjuTitle}>Жиры</Text>
+          <View style={styles.blocks}>
+            <Text style={styles.BJULabel}>{fat}</Text>
+          </View>
+        </View>
+
+        <View style={styles.bjuItem}>
+          <Text style={styles.bjuTitle}>Углев</Text>
+          <View style={styles.blocks}>
+            <Text style={styles.BJULabel}>{carbs}</Text>
+          </View>
+        </View>
       </View>
+
 
       <View style={styles.BottomPanel}>
         <View style={styles.imageWrapper}>
@@ -129,91 +141,6 @@ export default function MenuItem({ id, name, kcal, protein, fat, carbs, image, o
 }
 
 
-const MacroProgressBar = ({ label, value, max, type, width }) => {
-  const progress = Math.min(value / max, 1);
-
-  return (
-    <View style={{ alignItems: 'center', width, marginHorizontal: 6 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width, paddingHorizontal: 5 }}>
-        <Text style={{ color: '#C8D0DC', fontSize: 12, fontWeight: "400" }}>{label}</Text>
-        <Text style={{ color: '#0046F8', fontSize: 12, fontWeight: "500" }}>{value}</Text>
-      </View>
-
-      <Svg height="47" width={width} style={{ marginTop: 4 }}>
-        <Defs>
-          <Pattern id="diagonalLines" patternUnits="userSpaceOnUse" width="6" height="6">
-            <Path d="M0,0 L6,6" stroke="white" strokeWidth="1.5" />
-            <Path d="M-3,3 L3,9" stroke="white" strokeWidth="1.5" />
-          </Pattern>
-
-          <Pattern id="plus" patternUnits="userSpaceOnUse" width="6" height="6">
-            <Line x1="1" y1="3" x2="5" y2="3" stroke="white" strokeWidth="1.2" />
-            <Line x1="3" y1="1" x2="3" y2="5" stroke="white" strokeWidth="1.2" />
-          </Pattern>
-
-          <LinearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#0046F8" />
-            <Stop offset="1" stopColor="white" />
-          </LinearGradient>
-
-        <ClipPath id="roundedTop">
-          <Path
-            d={`
-              M0,${47 - 47 * progress + 15}
-              A15,15 0 0 1 15,${47 - 47 * progress}
-              H${width - 15}
-              A15,15 0 0 1 ${width},${47 - 47 * progress + 15}
-              V47
-              H0
-              Z
-            `}
-          />
-        </ClipPath>
-
-        </Defs>
-
-        <Svg height="47" width={width}>
-        <Path
-          d={`
-            M0,15
-            A15,15 0 0 1 15,0
-            H${width - 15}
-            A15,15 0 0 1 ${width},15
-            V47
-            H0
-            Z
-          `}
-          fill="#F1F3F6"
-        />
-        </Svg>
-
-      <G clipPath="url(#roundedTop)">
-        <Rect
-          x="0"
-          y={47 - 47 * progress}
-          width={width}
-          height={47 * progress}
-          fill="#0046F8"
-        />
-        <Rect
-          x="0"
-          y={47 - 47 * progress}
-          width={width}
-          height={47 * progress}
-          fill={
-            type === 'protein'
-              ? 'url(#diagonalLines)'
-              : type === 'fat'
-                ? 'url(#plus)'
-                : 'url(#grad)'
-          }
-        />
-      </G>
-      </Svg>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   dishes: {
     height: 146,
@@ -222,6 +149,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     overflow: "hidden"
   },
+
+
+  BJU: {
+    flexDirection: "row",
+    position: "absolute",
+    bottom: 12,
+    left: 10
+  },
+
+
+  bjuTitle: {
+    fontSize: 12,
+    color: "#616366ff",
+    marginBottom: 4,
+    marginLeft: 14
+  },
+
+  BJULabel: {
+    fontSize: 16,
+    fontWeight: "400",
+    color: "#000000"
+  },
+
+  blocks: {
+    height: 38,
+    width: width * 0.17,
+    marginLeft: 10,
+    borderRadius: 12,
+    backgroundColor: "#F1F3F6",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+
   TopPanel: {
     flexDirection: "row",
     padding: 12
@@ -253,9 +213,9 @@ const styles = StyleSheet.create({
     color: "#000000"
   },
   kcal: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: "400",
-    color: "#C8D0DC",
+    color: "#010101",
     marginTop: 3
   },
   imageWrapper: {

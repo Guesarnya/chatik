@@ -18,7 +18,7 @@ export default function InMotivationApi({ visible, onClose }) {
     const handleGetMotivation = async () => {
         setLoading(true);
         try {
-            const response = await fetch('https://chatik-zp8f.onrender.com/motivation');
+            const response = await fetch('https://chatik-1.onrender.com/motivation');
             const data = await response.json();
             setCurrentMotivation(data.message);
         } catch (error) {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 
     modalBox: {
         width: width * 0.95,
-        height: height * 0.45,
+        height: height * 0.48,
         backgroundColor: "white",
         borderRadius: 20,
         padding: 20,

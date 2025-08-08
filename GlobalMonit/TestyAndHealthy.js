@@ -26,7 +26,7 @@ export default function TestyAndHealthy({ visible, onClose }) {
     const handleGetRecipe = async () => {
         setLoading(true);
         try {
-            const response = await fetch('https://chatik-zp8f.onrender.com/recipe');
+            const response = await fetch('https://chatik-1.onrender.com/recipe');
             const data = await response.json();
             setCurrentRecipe(data.message);
         } catch (error) {

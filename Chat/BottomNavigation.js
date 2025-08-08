@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Alert } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,7 +8,6 @@ import * as Camera from "expo-camera";
 import { useFocusEffect } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
 
-import ImagePreviewModal from './ImagePreviewModal';
 import CameraModal from './CameraModal';
 
 const tabs = [
@@ -25,6 +24,14 @@ export default function BottomNavBar() {
   const navigation = useNavigation();
   const route = useRoute();
   const { activeTab, setActiveTab } = useTab();
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [dishName, setDishName] = useState('');
+  const [kcal, setKcal] = useState(0);
+  const [protein, setProtein] = useState(0);
+  const [fat, setFat] = useState(0);
+  const [uglevodi, setUglevodi] = useState(0);
 
 
   useFocusEffect(
@@ -51,49 +58,151 @@ export default function BottomNavBar() {
     setPreviewVisible(false);
   };
 
-  const takePhoto = async () => {
-    setModalVisible(false);
+const takePhoto = async () => {
+  setModalVisible(false);
+  setIsLoading(true);
 
-    setTimeout(async () => {
-      const { status } = await Camera.Camera.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert("Ошибка", "Разрешение на использование камеры отклонено");
-        return;
+  setTimeout(async () => {
+    const { status } = await Camera.Camera.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Ошибка", "Разрешение на использование камеры отклонено");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: false,
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setPreviewUri(uri);
+      setPreviewVisible(true);
+      navigation.navigate('ImagePreview', { imageUri: uri, isLoading: true });
+
+      const cloudinaryUrl = await uploadImageToCloudinary(uri);
+      if (cloudinaryUrl) {
+        console.log('Изображение загружено на Cloudinary:', cloudinaryUrl);
+        
+        analyzeImage(cloudinaryUrl);
       }
+    }
+  }, 700);
+};
 
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: false,
-        quality: 1,
-      });
+const pickFromGallery = async () => {
+  setModalVisible(false);
+  setIsLoading(true);
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setPreviewUri(result.assets[0].uri);
-        setPreviewVisible(true);
+  setTimeout(async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert("Ошибка", "Разрешение на доступ к галерее отклонено");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setPreviewUri(uri);
+      setPreviewVisible(true);
+      navigation.navigate('ImagePreview', { imageUri: uri, isLoading: true });
+
+      const cloudinaryUrl = await uploadImageToCloudinary(uri);
+      if (cloudinaryUrl) {
+        console.log('Изображение загружено на Cloudinary:', cloudinaryUrl);
+
+        analyzeImage(cloudinaryUrl);
       }
-    }, 700);
+    }
+  }, 700);
+};
+
+const uploadImageToCloudinary = async (uri) => {
+  const formData = new FormData();
+  
+  const file = {
+    uri: uri,
+    type: 'image/jpeg',
+    name: 'photo.jpg',
   };
 
-  const pickFromGallery = async () => {
-    setModalVisible(false);
+  formData.append('file', file);
+  formData.append('upload_preset', 'FoodMood');
 
-    setTimeout(async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert("Ошибка", "Разрешение на доступ к галерее отклонено");
-        return;
-      }
+  try {
+    const response = await fetch('https://api.cloudinary.com/v1_1/dsmswpqzj/image/upload', {
+      method: 'POST',
+      body: formData,
+    });
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        allowsEditing: false,
-        quality: 1,
-      });
+    const data = await response.json();
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setPreviewUri(result.assets[0].uri);
-        setPreviewVisible(true);
-      }
-    }, 700);
-  };
+    if (data.secure_url) {
+      return data.secure_url;
+    } else {
+      console.error('Ошибка загрузки изображения:', data);
+      return null;
+    }
+  } catch (error) {
+    console.error('Ошибка при загрузке на Cloudinary:', error);
+    return null;
+  }
+};
+
+
+const analyzeImage = async (cloudinaryUrl) => {
+  setIsLoading(true);
+
+  try {
+    const response = await fetch(`http://66.151.40.57:8080/food/analyze?imageUrl=${encodeURIComponent(cloudinaryUrl)}`, {
+      method: 'GET',
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Результат анализа:', result);
+
+      const { name, nutrients, joke } = result.result;
+
+
+      const imageData = {
+        imageUri: cloudinaryUrl,
+        name: name || 'Неизвестное блюдо',
+        calories: nutrients?.calories || 0,
+        protein: nutrients?.protein || 0,
+        fat: nutrients?.fat || 0,
+        carbs: nutrients?.carbs || 0,
+        joke: joke || '',
+        isLoading: false
+      };
+
+      navigation.navigate('ImagePreview', imageData);
+
+    } else {
+      console.error('Ошибка при анализе изображения на сервере');
+    }
+  } catch (error) {
+    console.error('Ошибка при отправке изображения на сервер:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 
   return (
     <>
@@ -126,17 +235,7 @@ export default function BottomNavBar() {
         onPickFromGallery={pickFromGallery}
       />
 
-      <ImagePreviewModal
-        key={previewUri}
-        visible={previewVisible}
-        imageUri={previewUri}
-        onSend={() => {
-          console.log("Отправка фото:", previewUri);
-          resetPreview();
-        }}
-        onDelete={resetPreview}
-        onClose={resetPreview}
-      />
+
     </>
   );
 }

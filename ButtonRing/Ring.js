@@ -88,7 +88,7 @@ export default function Ring({ isSmall = false }) {
 
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleSendRing}>
       <View style={styles.header}>
         <View>
           <Text style={styles.caloriesValue}>{calories}</Text>
@@ -197,7 +197,7 @@ export default function Ring({ isSmall = false }) {
       <MacroProgressBar label="Углеводы" value={carbs} max={macroGrams.carb} type="carb" />
 
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

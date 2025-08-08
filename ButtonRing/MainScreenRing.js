@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,10 +7,10 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 import Ring from './Ring';
 import DateSelector from './Date';
 import MenuItem from './Menu';
@@ -26,10 +26,12 @@ const MainScreenRing = () => {
   const [selectedDish, setSelectedDish] = useState(null);
   const [needsRefresh, setNeedsRefresh] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchDishes = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('https://chatik-zp8f.onrender.com/dishes');
+      const response = await fetch('https://chatik-1.onrender.com/dishes');
       const data = await response.json();
 
       const formattedDishes = data.map((dish) => {
@@ -40,36 +42,28 @@ const MainScreenRing = () => {
       });
 
       setDishes(formattedDishes);
-    } catch (error) {
-      console.error('Ошибка при получении блюд:', error);
-    }
-  };
-
-useEffect(() => {
-  const fetchDishes = async () => {
-    try {
-      const response = await fetch('https://chatik-zp8f.onrender.com/dishes');
-      const data = await response.json();
-
-      const formattedDishes = data.map((dish) => {
-        return {
-          ...dish,
-          date_act: new Date(dish.date_act),
-        };
-      });
-
-      setDishes(formattedDishes);
+      setLoading(false);
 
       const today = new Date().toISOString().split('T')[0];
       setSelectedDate(today); 
     } catch (error) {
+      setLoading(false);
       console.error('Ошибка при получении блюд:', error);
     }
   };
 
-  fetchDishes();
-}, []);
+  useEffect(() => {
+    fetchDishes();
+  }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (needsRefresh) {
+        fetchDishes();
+        setNeedsRefresh(false);
+      }
+    }, [needsRefresh])
+  );
 
   const openEditModal = (dish) => {
     setSelectedDish(dish);
@@ -86,18 +80,9 @@ useEffect(() => {
     closeModal();
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      if (needsRefresh) {
-        fetchDishes();
-        setNeedsRefresh(false);
-      }
-    }, [needsRefresh])
-  );
-
   const handleDelete = async (idToDelete) => {
     try {
-      await fetch(`https://chatik-zp8f.onrender.com/api/delete_card?card_id=${idToDelete}`);
+      await fetch(`https://chatik-1.onrender.com/api/delete_card?card_id=${idToDelete}`);
       await fetchDishes();
       setDishes((prev) => prev.filter((d) => d.id !== idToDelete));
     } catch (error) {
@@ -116,29 +101,34 @@ useEffect(() => {
           <Ring isSmall={isCompactRing} />
         </View>
 
-        {/* Передаем setSelectedDate в DateSelector */}
+
         <DateSelector style={styles.dateSelector} onDateChange={setSelectedDate} />
 
-        <FlatList
-          style={styles.FlatList}
-          data={filteredDishes}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <MenuItem
-              id={item.id}
-              name={item.name}
-              kcal={item.kcal}
-              protein={item.protein}
-              fat={item.fat}
-              carbs={item.carbs}
-              image={{ uri: item.image }}
-              onPress={() => openEditModal(item)}
-              onDelete={() => handleDelete(item.id)}
-              onSettingsConfirm={handleConfirmEdit}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
-        />
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#007BFF" style = {{alignItems: "center", justifyContent: "center", flex: 1}} />
+        ) : (
+          <FlatList
+            style={styles.FlatList}
+            data={filteredDishes}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <MenuItem
+                id={item.id}
+                name={item.name}
+                kcal={item.kcal}
+                protein={item.protein}
+                fat={item.fat}
+                carbs={item.carbs}
+                image={{ uri: item.image }}
+                onPress={() => openEditModal(item)}
+                onDelete={() => handleDelete(item.id)}
+                onSettingsConfirm={handleConfirmEdit}
+              />
+            )}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
 
         <Modal visible={isModalVisible} transparent animationType="slide">
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

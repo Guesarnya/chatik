@@ -143,7 +143,7 @@ const handleConfirm = (date) => {
           return (
             <TouchableOpacity
               style={[styles.buttonContainer, selected && styles.selectedButtonContainer]}
-              onPress={() => handleDayPress(index, item)}
+              onPress={() => handleDayPress(index, item)} 
               activeOpacity={0.8}
             >
               <Text
@@ -175,7 +175,7 @@ const handleConfirm = (date) => {
         <Ionicons name="calendar-outline" size={24} color="#0046F8" />
       </TouchableOpacity>
       </View> 
-      {/* В случае чего удалить если надо будет прямая */}
+
 
     <DateTimePickerModal
       isVisible={isDatePickerVisible}

@@ -26,7 +26,7 @@ export default function Health() {
 
  
   const baseHeight = 129;
-  const totalHeight = screenHeight < 700 ? baseHeight * 0.7 : baseHeight; 
+  const totalHeight = screenHeight < 900 ? baseHeight * 0.76 : baseHeight; 
 
   const progress = 76;
   const filledHeight = (progress / 100) * totalHeight;

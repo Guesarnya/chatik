@@ -8,7 +8,7 @@ import { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { height, width } = Dimensions.get('window');
-const isSmallScreen = width < 380;
+const isSmallScreen = width < 400;
 
 export default function Biometry() {
   const handleSend = () => {
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
 
   kiloSmall: {
-    height: 30,  
+    height: 40,  
     paddingVertical: 6,
   },
 

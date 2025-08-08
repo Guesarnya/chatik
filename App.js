@@ -9,6 +9,8 @@ import TestyAndHealthy from './GlobalMonit/TestyAndHealthy';
 import ButtonBiometry from './InGLobalMonit/ButtonBiometry'
 import { TabProvider } from './AllBackEnd/TabContext';
 import { enableScreens } from 'react-native-screens';
+import ImagePreviewScreen from './Chat/ImagePreviewScreen';
+
 enableScreens();
 
 const Stack = createNativeStackNavigator();
@@ -22,7 +24,7 @@ export default function App() {
             initialRouteName="MainScreen"
             screenOptions={{
               headerShown: false,
-              animation: 'slide_from_right',
+              animation: 'none',
             }}
           >
             <Stack.Screen name="MainScreen" component={MainScreen} />
@@ -30,6 +32,7 @@ export default function App() {
             <Stack.Screen name="MainScreenRing" component={MainScreenRing} />
             <Stack.Screen name="TestyAndHealthy" component={TestyAndHealthy} />
             <Stack.Screen name="ButtonBiometry" component={ButtonBiometry} />
+            <Stack.Screen name='ImagePreview' component={ImagePreviewScreen}/>
           </Stack.Navigator>
         </NavigationContainer>
       </TabProvider>

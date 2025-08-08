@@ -126,6 +126,7 @@ export default function ButtonBiometry() {
             placeholderTextColor="#C8D0DC"
             value={age}
             onChangeText={setAge}
+            keyboardType="numeric"
           />
         </View>
       </View>
@@ -139,6 +140,7 @@ export default function ButtonBiometry() {
             placeholderTextColor="#C8D0DC"
             value={weight}
             onChangeText={setWeight}
+            keyboardType="numeric"
           />
         </View>
       </View>
@@ -152,6 +154,7 @@ export default function ButtonBiometry() {
             placeholderTextColor="#C8D0DC"
             value={heightValue}
             onChangeText={setHeightValue}
+            keyboardType="numeric"
           />
         </View>
       </View>
@@ -357,7 +360,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: height * 0.13,
+    height: height * 0.12,
     backgroundColor: "#0046F8",
     justifyContent: "center",
     alignItems: "center",
@@ -389,7 +392,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "white",
     width: width * 0.93,
-    height: height * 0.07,
+    height: height * 0.066,
     borderRadius: 20,
     alignSelf: "center",
     paddingHorizontal: 16,
@@ -419,7 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignSelf: 'center',
     width: width * 0.93,
-    height: height * 0.07,
+    height: height * 0.066,
     borderRadius: 20,
     backgroundColor: '#f1f4f8',
     marginTop: 10,

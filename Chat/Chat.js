@@ -10,11 +10,11 @@ import { useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 
-
+const {width, height} = Dimensions.get("window")
 
 export default function Chat() {
 
-  const { width } = useWindowDimensions();
+  // const { width } = useWindowDimensions();
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const flatListRef = useRef(null);
@@ -42,17 +42,31 @@ export default function Chat() {
   }, []);
 
 
+  const LoadingDots = () => {
+    const [dots, setDots] = useState("...");
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setDots((prev) => (prev.length === 3 ? "." : prev + "."));
+      }, 500);
+
+      return () => clearInterval(interval);
+    }, []);
+
+    return <Text>{dots}</Text>;
+  };
 
 
   const handleSend = async () => {
     const trimmedMessage = message.trim();
     if (!trimmedMessage || isLoading) return;
 
-    setIsLoading(true); 
+    setIsLoading(true);
     const time = new Date().toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     });
+
 
     const userMessage = {
       id: Date.now().toString(),
@@ -64,8 +78,18 @@ export default function Chat() {
     setMessages((prev) => [userMessage, ...prev]);
     setMessage('');
 
+
+    const loadingMessage = {
+      id: Date.now() + 1,
+      text: 'Загрузка...',
+      isMyMessage: false,
+      time,
+      isLoading: true,
+    };
+    setMessages((prev) => [loadingMessage, ...prev]);
+
     try {
-      const response = await fetch('https://chatik-zp8f.onrender.com/chat/message', {
+      const response = await fetch('https://chatik-1.onrender.com/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,8 +103,8 @@ export default function Chat() {
         typeof data.message === 'string'
           ? data.message
           : typeof data.message?.text === 'string'
-            ? data.message.text
-            : 'Ошибка: неправильный формат ответа';
+          ? data.message.text
+          : 'Ошибка: неправильный формат ответа';
 
       const replies = (data.followUps || []).slice(0, 2);
 
@@ -101,11 +125,13 @@ export default function Chat() {
           }
         : null;
 
-      setMessages((prev) =>
-        extraMessage
-          ? [extraMessage, botMessage, ...prev]
-          : [botMessage, ...prev]
-      );
+
+      setMessages((prev) => {
+        const updatedMessages = prev.filter((msg) => msg.id !== loadingMessage.id);
+        return extraMessage
+          ? [extraMessage, botMessage, ...updatedMessages]
+          : [botMessage, ...updatedMessages];
+      });
 
       setTimeout(() => {
         flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
@@ -113,33 +139,43 @@ export default function Chat() {
     } catch (error) {
       console.error('Ошибка при отправке сообщения:', error);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
 
 
-
   const handleReply = async (replyText, botMessageId) => {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+
     const replyMessage = {
       id: Date.now().toString(),
       text: replyText,
       time,
-      isMyMessage: true
+      isMyMessage: true,
     };
 
-    setMessages(prev =>
+    setMessages((prev) =>
       [
         replyMessage,
-        ...prev.map(m =>
-          m.id === botMessageId ? { ...m, replies: null } : m
-        )
+        ...prev.map((m) => (m.id === botMessageId ? { ...m, replies: null } : m)),
       ]
     );
 
+
+    const loadingMessage = {
+      id: Date.now() + 1,
+      text: 'Загрузка...',
+      isMyMessage: false,
+      time,
+      isLoading: true,
+    };
+
+    setMessages((prev) => [loadingMessage, ...prev]);
+
     try {
-      const response = await fetch('https://chatik-zp8f.onrender.com/chat/message', {
+      const response = await fetch('https://chatik-1.onrender.com/chat/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,9 +189,8 @@ export default function Chat() {
         typeof data.message === 'string'
           ? data.message
           : typeof data.message?.text === 'string'
-            ? data.message.text
-            : 'Ошибка: неправильный формат ответа';
-
+          ? data.message.text
+          : 'Ошибка: неправильный формат ответа';
 
       const replies = (data.followUps || []).slice(0, 2);
 
@@ -176,16 +211,16 @@ export default function Chat() {
           }
         : null;
 
-      setMessages((prev) =>
-        extraMessage
-          ? [extraMessage, botMessage, ...prev]
-          : [botMessage, ...prev]
-      );
+      setMessages((prev) => {
+        const updatedMessages = prev.filter((msg) => msg.id !== loadingMessage.id);
+        return extraMessage
+          ? [extraMessage, botMessage, ...updatedMessages]
+          : [botMessage, ...updatedMessages];
+      });
 
       setTimeout(() => {
         flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
       }, 100);
-
     } catch (error) {
       console.error('Ошибка при отправке ответа от reply-кнопки:', error);
     }
@@ -193,24 +228,25 @@ export default function Chat() {
 
 
 
+
+
+
+
   
-  const MessageItem = ({ message, showAvatar }) => {
+const MessageItem = ({ message, showAvatar }) => {
   const [bubbleWidth, setBubbleWidth] = useState(null);
   const [bubbleHeight, setBubbleHeight] = useState(null);
 
   return (
     <View style={{ flexDirection: 'row', marginBottom: 5, alignSelf: message.isMyMessage ? 'flex-end' : 'flex-start' }}>
-      {!message.isMyMessage && (
-        <View style={{ width: 40, alignItems: 'center' }}>
+
+      {/* Блок с аватаром, только если это не мое сообщение */}
+      {!message.otherMessage && (
+        <View style={{ width: 40, alignItems: 'center', justifyContent: "center" }}>
           {showAvatar ? (
             <Image
               source={require('../assets/suppor.png')}
-              style={[
-                styles.avatar,
-                bubbleHeight != null && {
-                  marginTop: (bubbleHeight - 40) / 2, 
-                }
-              ]}
+              style={[styles.avatar]}
             />
           ) : (
             <View style={styles.avatarPlaceholder} />
@@ -218,26 +254,33 @@ export default function Chat() {
         </View>
       )}
 
+      {/* Блок с сообщением */}
       <View style={{ flex: 1 }}>
         <View
-          style={[
-            styles.messageBubble,
-            message.isMyMessage ? styles.myMessage : styles.otherMessage
-          ]}
+          style={[styles.messageBubble, message.isMyMessage ? styles.myMessage : styles.otherMessage]}
           onLayout={(event) => {
             const { width, height } = event.nativeEvent.layout;
             setBubbleWidth(width);
             setBubbleHeight(height);
           }}
         >
-        <RenderHTML
-          contentWidth={width}
-          source={{ html: `<div>${message.text}</div>` }}
-          baseStyle={message.isMyMessage ? styles.myMessageText : styles.otherMessageText}
-        />
+          {/* Если сообщение загружается, отображаем анимацию */}
+          {message.isLoading ? (
+            <LoadingDots />
+          ) : (
+            <RenderHTML
+              contentWidth={width}
+              source={{ html: `<div>${message.text}</div>` }}
+              baseStyle={message.isMyMessage ? styles.myMessageText : styles.otherMessageText}
+            />
+          )}
+          {/* Время сообщения */}
           <Text style={styles.messageTime}>{message.time}</Text>
         </View>
 
+
+<View style={{ flexDirection: "column", marginBottom: 5, alignSelf: message.isMyMessage ? 'flex-end' : 'flex-start' }}>
+        {/* Блок с кнопками reply */}
         {message.replies?.map((reply, idx) => (
           <TouchableOpacity
             key={idx}
@@ -245,19 +288,21 @@ export default function Chat() {
             style={[
               styles.replyButton,
               {
-                width: bubbleWidth,
+                width: 800,
                 alignSelf: message.isMyMessage ? 'flex-end' : 'flex-start',
-              }
+              },
             ]}
           >
             <Text style={styles.replyText}>{reply.label}</Text>
           </TouchableOpacity>
         ))}
-
+</View>
       </View>
     </View>
   );
-}
+};
+
+
 
 
   const [activeTab, setActiveTab] = useState('map');

@@ -57,7 +57,7 @@ export class OpenaiService {
       messages: [
         {
           role: 'system',
-          content: 'Ты помощник, который отвечает пользователю и предлагает follow-up вопросы.',
+          content: 'Ты помощник по питанию, который отвечает пользователю и предлагает follow-up вопросы.',
         },
         {
           role: 'user',

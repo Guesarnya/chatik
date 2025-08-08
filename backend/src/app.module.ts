@@ -5,7 +5,6 @@ import { MotivationController } from './motivation/motivation.controller';
 import { OpenaiService } from './openai/openai.service';
 import { GetRecipeController } from './recipe/recipe.controller';
 import { ChatController } from './chat/chat.controller';
-// import { AuthModule } from './auth/auth.module';
 import { DishController } from './dish/dish.controller';
 import { DishService } from './dish/dish.service';
 import { HttpModule } from '@nestjs/axios'; 
