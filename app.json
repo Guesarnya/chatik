@@ -29,14 +29,14 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "owner": "guesarnya",
-    "extra": {
-      "eas": {
-        "projectId": "3ba37458-7bdf-4dd9-b67c-75fa879c2394"
-      }
-    },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0b58a5fa-d6d5-40c3-914c-119e5ae7703f"
+      }
+    },
+    "owner": "guesshohloness"
   }
 }

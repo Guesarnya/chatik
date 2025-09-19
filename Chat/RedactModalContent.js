@@ -39,7 +39,7 @@ const RedactModalContent = ({ visible, setVisible, dishName, protein, fat, carbs
       padding: 20,
       borderRadius: 10,
       width: width * 0.9,
-      height: isSmallScreen ? height * 0.8 : height * 0.62,
+      height: isSmallScreen ? height * 0.76 : height * 0.60,
     },
     middleBlock: {
       paddingHorizontal: 10,
@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
 
   topBlock: {
     padding: 2,
+    height: height * 0.58
   },
   mainLabel: {
     fontSize: 24,

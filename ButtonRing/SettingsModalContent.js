@@ -66,6 +66,10 @@ export const SettingsModalContent = ({ onClose, onConfirm, cardId, dishName, cur
 
   const modalStyles = StyleSheet.create({
     container: {
+      backgroundColor: 'white',
+      padding: 20,
+      borderRadius: 10,
+      width: width * 0.9,
       height: isSmallScreen ? height * 0.76 : height * 0.60,
     },
     middleBlock: {
