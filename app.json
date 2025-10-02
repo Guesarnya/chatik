@@ -13,7 +13,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Приложению нужен доступ к фото, чтобы загружать изображения блюд",
+        "NSCameraUsageDescription": "Приложению нужен доступ к камере, чтобы делать фотографии",
+        "NSMicrophoneUsageDescription": "Приложению нужен доступ к микрофону, чтобы записывать звук (если используется)"
+      }
     },
     "android": {
       "usesCleartextTraffic": true,
