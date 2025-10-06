@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import BottomNavBar from './BottomNavigation';
 import RenderHTML from 'react-native-render-html';
@@ -235,10 +236,36 @@ export default function Chat({ route }) {
   };
 
 
+  useEffect(() => {
+    const saveMessages = async () => {
+      try {
+        const limitedMessages = messages.slice(0, 50);
+        await AsyncStorage.setItem(`chat_history_${userId}`, JSON.stringify(limitedMessages));
+      } catch (e) {
+        console.error('Ошибка при сохранении истории:', e);
+      }
+    };
 
+    if (messages.length > 0) {
+      saveMessages();
+    }
+  }, [messages]);
 
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(`chat_history_${userId}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setMessages(parsed);
+        }
+      } catch (e) {
+        console.error('Ошибка при загрузке истории:', e);
+      }
+    };
 
-
+    loadMessages();
+  }, [userId]);
 
 
   const MessageItem = ({ message, showAvatar }) => {
